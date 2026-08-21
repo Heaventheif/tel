@@ -1,0 +1,26 @@
+{
+  "name": "telegram-media-bot",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "بوت تيليجرام لتحميل الوسائط — Pure JavaScript على Bun، بدون Python وبدون Docker",
+  "scripts": {
+    "start": "bun run main.js",
+    "dev": "bun --watch run main.js",
+    "test": "node --test tests/*.test.js",
+    "check": "node --input-type=module --check < main.js && node --input-type=module --check < api.js && node --input-type=module --check < plugin-loader.js && node --input-type=module --check < config.js && node --input-type=module --check < telegram-api.js && node --input-type=module --check < lib/http.js && node --input-type=module --check < plugins/generic.js && node --input-type=module --check < autodl.js"
+  },
+  "dependencies": {
+    "@tobyg74/tiktok-api-dl": "latest",
+    "@transcribe/transcriber": "latest",
+    "@vreden/youtube_scraper": "^1.2.9",
+    "hlsdownloader": "^3.0.0",
+    "ioredis": "^5.4.1",
+    "shazamio-core": "^1.3.1",
+    "youtubei.js": "18.0.0",
+    "yt-search": "^2.11.1"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  }
+}

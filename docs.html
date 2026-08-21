@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Media Bot — دليل API</title>
+  <style>
+    :root{--bg:#09111f;--card:#111e34;--line:#294364;--text:#eff6ff;--muted:#a8bdd7;--blue:#77adff;--green:#54dfb0;--amber:#ffd078;--code:#081321}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.75 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}.wrap{width:min(920px,calc(100% - 32px));margin:auto}.nav{padding:20px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.nav a{color:var(--blue);text-decoration:none}.hero{padding:54px 0 34px}.kicker{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.08em}.hero h1{font-size:clamp(28px,5vw,45px);line-height:1.2;letter-spacing:-.04em;margin:10px 0}.hero p,.lead{color:var(--muted);max-width:690px}.notice{background:#54dfb010;border:1px solid #54dfb050;border-radius:14px;padding:15px 17px;color:var(--muted)}.notice strong{color:var(--green)}h2{font-size:21px;margin:42px 0 12px}h3{font-size:16px;margin:0}.endpoint{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:14px 0}.method{font:700 12px ui-monospace,monospace;padding:4px 8px;border-radius:6px;margin-left:8px;direction:ltr;display:inline-block}.get{color:var(--green);background:#54dfb01a}.post{color:#d3b8ff;background:#bd8bff1a}.path{font:600 16px ui-monospace,monospace;direction:ltr;display:inline-block}p{margin:10px 0;color:var(--muted)}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#cbdeff}.code{direction:ltr;text-align:left;white-space:pre;overflow:auto;background:var(--code);border:1px solid var(--line);border-radius:11px;padding:14px;color:#c5d9f4;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;margin:13px 0}.table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}.table th,.table td{padding:11px;border-bottom:1px solid var(--line);text-align:right;font-size:13px}.table th{color:var(--muted)}.table tr:last-child td{border:0}.tag{display:inline-block;border:1px solid #ffd07855;color:var(--amber);background:#ffd0780e;padding:2px 7px;border-radius:999px;font-size:11px}.footer{padding:38px 0;color:var(--muted);font-size:12px}.footer a{color:var(--blue)}@media(max-width:540px){.wrap{width:min(100% - 24px,920px)}.hero{padding-top:34px}.table{display:block;overflow:auto;white-space:nowrap}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <nav><a href="/">← لوحة التحكم</a><span class="tag">API عامة · بلا مصادقة</span></nav>
+    <section class="hero"><div class="kicker">MEDIA BOT API</div><h1>دليل التكامل المباشر</h1><p>تدفق التكامل بسيط: افحص الرابط للحصول على الجودات، ثم أرسل الرابط ومفتاح الجودة إلى مسار التنزيل. لا تحتاج إلى مفتاح API أو ترويسة <code>Authorization</code>.</p><div class="notice"><strong>الواجهة مفتوحة عمداً.</strong> للحفاظ على الاستقرار، تطبق الخدمة قيود حجم جسم الطلب، والتحقق من الرابط، وحدوداً للمعدل، وقفل تنزيل مشتركاً مع بوت تيليجرام. استخدم رمز الحالة <code>429</code> و<code>Retry-After</code> لإعادة المحاولة بأدب.</div></section>
+
+    <h2 id="flow">تدفق العمل</h2><div class="code">1. POST /api/probe    { "url": "https://…" }
+2. اختر options[n].key من الاستجابة
+3. POST /api/download { "url": "https://…", "key": "…" }
+4. اقرأ stream الثنائي واحفظه كملف</div>
+    <p class="lead">لا تمرر حقلاً باسم <code>extra</code>. الخادم يعيد تنفيذ الفحص داخلياً ويستخدم بيانات المزود الموثوقة، حتى لا تُكشف روابط موقعة أو بيانات مؤقتة للعميل.</p>
+
+    <h2 id="endpoints">المسارات</h2>
+    <article class="endpoint"><h3><span class="method get">GET</span><span class="path">/health</span></h3><p>فحص سريع لحياة الخدمة، مناسب للمراقبة والاستضافة.</p><div class="code">{ "status": "healthy", "ts": 1735000000.12 }</div></article>
+    <article class="endpoint"><h3><span class="method get">GET</span><span class="path">/api/health</span></h3><p>حالة تشغيل تفصيلية مناسبة لفحوص Render والمراقبة العامة. لا تتطلب مصادقة.</p><div class="code">{ "ok": true, "uptime": 3600, "plugins": 11, "activeDownloads": 1, "memoryMB": 128, "version": "2.0.0" }</div></article>
+    <article class="endpoint"><h3><span class="method get">GET</span><span class="path">/api/plugins</span></h3><p>يعيد الإضافات المحملة والنطاقات التي تدعمها وحالة مزوديها. يمكن استدعاؤه من المتصفح مباشرة؛ CORS مفعّل للواجهة العامة.</p><div class="code">{
+  "ok": true,
+  "plugins": [{ "name": "youtube", "domains": ["youtube.com"], "status": "loaded", "providerStatus": { "youtubei": { "status": "closed", "failuresInWindow": 0 } } }],
+  "requestId": "a1b2c3d4e5f6a7b8"
+}</div></article>
+    <article class="endpoint"><h3><span class="method post">POST</span><span class="path">/api/probe</span></h3><p>يتعرف على الإضافة المناسبة ويعيد خيارات الجودة. يجب أن تكون الترويسة <code>Content-Type: application/json</code>.</p><div class="code">curl -sS -X POST "https://YOUR-SERVICE/api/probe" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://youtu.be/dQw4w9WgXcQ"}'</div><div class="code">{
+  "ok": true,
+  "title": "اسم الوسيط",
+  "plugin": "youtube",
+  "options": [
+    { "key": "v_720", "label": "720p", "kind": "video", "sizeHint": 0 },
+    { "key": "a_128", "label": "128kbps", "kind": "audio", "sizeHint": 0 }
+  ],
+  "requestId": "a1b2c3d4e5f6a7b8"
+}</div></article>
+    <article class="endpoint"><h3><span class="method post">POST</span><span class="path">/api/download</span></h3><p>ينزّل الوسيط ويعيده في response stream. يعتمد <code>key</code> على نتيجة <code>/api/probe</code>.</p><div class="code">curl -L -X POST "https://YOUR-SERVICE/api/download" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://youtu.be/dQw4w9WgXcQ","key":"v_720"}' \
+  --output media.mp4</div><p>الترويسات المفيدة: <code>Content-Disposition</code>، <code>Content-Length</code>، <code>X-Media-Title</code>، <code>X-Media-Type</code>، <code>X-Plugin</code> و<code>X-Request-Id</code>.</p></article>
+
+    <h2>رموز الحالة وإعادة المحاولة</h2>
+    <table class="table"><thead><tr><th>الرمز</th><th>المعنى</th><th>سلوك العميل المقترح</th></tr></thead><tbody><tr><td><code>200</code></td><td>نجاح</td><td>استخدم الاستجابة أو احفظ stream.</td></tr><tr><td><code>400 / 415</code></td><td>رابط أو JSON أو Content-Type غير صالح</td><td>صحح الطلب؛ لا تعِد الإرسال نفسه.</td></tr><tr><td><code>404 / 422</code></td><td>جودة غير موجودة أو رابط غير مدعوم</td><td>أعد الفحص أو اعرض رسالة مناسبة للمستخدم.</td></tr><tr><td><code>429</code></td><td>تجاوز حد الطلبات</td><td>انتظر قيمة <code>Retry-After</code> ثم أعد المحاولة.</td></tr><tr><td><code>502 / 504</code></td><td>المزود الخارجي أخفق أو تأخر</td><td>أعد المحاولة لاحقاً بعد تأخير متزايد.</td></tr></tbody></table>
+
+    <h2>مثال JavaScript</h2><div class="code">const base = "https://YOUR-SERVICE";
+const probe = await fetch(`${base}/api/probe`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url }),
+}).then((r) => r.json());
+
+if (!probe.ok) throw new Error(probe.error);
+const key = probe.options[0].key;
+const media = await fetch(`${base}/api/download`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url, key }),
+});
+if (!media.ok) throw new Error((await media.json()).error);
+const blob = await media.blob();</div>
+    <footer class="footer">Media Bot · <a href="/">العودة إلى لوحة التحكم واختبار المسارات</a></footer>
+  </main>
+</body>
+</html>
